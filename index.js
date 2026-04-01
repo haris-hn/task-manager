@@ -27,6 +27,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
 
+// Root route to prevent 404
+app.get('/', (req, res) => {
+    res.send('Task Manager API is running');
+});
+
 // Basic Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
