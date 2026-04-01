@@ -3,6 +3,7 @@ const cors = require("cors");
 const connectDB = require("../config/db");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("../swagger");
+const serverless = require("serverless-http"); // ✅ added
 
 // Connect to database
 connectDB();
@@ -32,4 +33,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || "Server Error" });
 });
 
-module.exports = app;
+// ✅ export as serverless function (IMPORTANT)
+module.exports = serverless(app);
