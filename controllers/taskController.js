@@ -5,10 +5,15 @@ const Task = require('../models/Task');
 // @access  Private
 const getTasks = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
         const tasks = await Task.find({ user: req.user.id });
         res.json(tasks);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("GET TASKS ERROR:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -17,8 +22,16 @@ const getTasks = async (req, res) => {
 // @access  Private
 const setTask = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
         const { title, description, status } = req.body;
-        
+
+        if (!title || !description) {
+            return res.status(400).json({ message: 'Title and description are required' });
+        }
+
         const task = await Task.create({
             title,
             description,
@@ -28,7 +41,8 @@ const setTask = async (req, res) => {
 
         res.status(201).json(task);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("CREATE TASK ERROR:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -37,6 +51,10 @@ const setTask = async (req, res) => {
 // @access  Private
 const updateTask = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
         const task = await Task.findById(req.params.id);
 
         if (!task) {
@@ -47,13 +65,16 @@ const updateTask = async (req, res) => {
             return res.status(401).json({ message: 'User not authorized' });
         }
 
-        const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
+        const updatedTask = await Task.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
 
         res.json(updatedTask);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("UPDATE TASK ERROR:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -62,6 +83,10 @@ const updateTask = async (req, res) => {
 // @access  Private
 const deleteTask = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
         const task = await Task.findById(req.params.id);
 
         if (!task) {
@@ -74,9 +99,10 @@ const deleteTask = async (req, res) => {
 
         await task.deleteOne();
 
-        res.json({ id: req.params.id });
+        res.json({ message: 'Task deleted', id: req.params.id });
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("DELETE TASK ERROR:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -85,4 +111,4 @@ module.exports = {
     setTask,
     updateTask,
     deleteTask
-};
+};  
